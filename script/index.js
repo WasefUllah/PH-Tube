@@ -15,8 +15,8 @@ const loadCategories = () => {
     });
 };
 // Load videos
-const loadVideos = () => {
-  fetch(`https://openapi.programming-hero.com/api/phero-tube/videos`)
+const loadVideos = (input = "") => {
+  fetch(`https://openapi.programming-hero.com/api/phero-tube/videos?title=${input}`)
     .then((res) => res.json())
     .then((data) => {
       removeActiveClass();
@@ -35,6 +35,12 @@ const loadCategoryVideos = (id) => {
       clickedButton.classList.add("active");
       displayVideos(data.category);
     });
+};
+// Load video details
+const loadVideoDetails = (vidId) => {
+  fetch(`https://openapi.programming-hero.com/api/phero-tube/video/${vidId}`)
+    .then((res) => res.json())
+    .then((data) => displayVideoDetails(data.video));
 };
 
 // Display categories
@@ -66,13 +72,13 @@ const displayVideos = (videos) => {
 
     videoCard.innerHTML = `
         <div class="card bg-base-100  shadow-sm">
-    <figure class="relative">
-      <img
-      class="object-cover w-full h-[160px]"
-        src="${vid.thumbnail}"
-        alt="Shoes" />
-        <span class="absolute bottom-5 right-5 bg-black text-white rounded-md px-2 py-1 text-xs">3h 56 min ago</span>
-    </figure>
+       <figure class="relative">
+         <img
+         class="object-cover w-full h-[160px]"
+          src="${vid.thumbnail}"
+          alt="Shoes" />
+         <span class="absolute bottom-5 right-5 bg-black text-white rounded-md px-2 py-1 text-xs">3h 56 min ago</span>
+          </figure>
     <div class="flex gap-3 px-0 py-4">
       <div class="profile">
         <div class="avatar">
@@ -83,13 +89,46 @@ const displayVideos = (videos) => {
       </div>
       <div class="intro">
         <h2 class="font-semibold text-sm">${vid.title}</h2>
-        <p class="text-sm text-gray-400 flex gap-2 justify-between items-center">${vid.authors[0].profile_name} <span><img class="w-5" src="https://img.icons8.com/?size=96&id=98A4yZTt9abw&format=png" alt=""></span></p> 
+        <p class="text-sm text-gray-400 flex gap-2  items-center">${vid.authors[0].profile_name} <span>${vid.authors[0].verified == true ?'<img class="w-5" src="https://img.icons8.com/?size=96&id=98A4yZTt9abw&format=png" alt=""></img>' :''}</span></p> 
         <p class="text-sm text-gray-400">${vid.others.views} views</p>
       </div>
     </div>
+    <button onclick=loadVideoDetails("${vid.video_id}") class="btn btn-block">Show details</button>
   </div>
         `;
     videoContainer.appendChild(videoCard);
   }
 };
+// show verified badge
+const showVerifiedBadge = (state) => {
+  if (state == true) {
+    return '';
+  }
+};
+
+// Display video details
+const displayVideoDetails = (video) => {
+  console.log(video.description);
+  document.getElementById("video_details").showModal();
+  const detailsContainer = document.getElementById("detailsContainer");
+  detailsContainer.innerHTML = `
+  <div class="card bg-base-100 shadow-sm">
+  <figure>
+    <img
+      src="${video.thumbnail}"
+      alt="video" />
+  </figure>
+  <div class="card-body">
+    <h2 class="card-title">${video.title}</h2>
+    <p>${video.description}</p>
+    
+  </div>
+</div>
+  `;
+};
+
+document.getElementById("searchInput").addEventListener("keyup", (e)=>{
+  loadVideos(e.target.value);
+})
+
 loadCategories();
